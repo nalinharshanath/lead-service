@@ -1,520 +1,571 @@
 import { useState } from "react";
-import emailjs from "@emailjs/browser";
 import "./App.css";
 
-const SERVICE_ID = "service_pkt151c";
-const TEMPLATE_ID = "template_h246roe";
-const PUBLIC_KEY = "Iib5_WdGDVvHvMgzl";
+const EMAILJS_SERVICE_ID = "service_pkt151c";
+const EMAILJS_PUBLIC_KEY = "Iib5_WdGDVvHvMgzl";
+
+const INTERNAL_TEMPLATE_ID = "template_h246roe";
+const AUTOREPLY_TEMPLATE_ID = "template_43zkrsn";
 
 function App() {
-  const [showRequest, setShowRequest] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [showServiceForm, setShowServiceForm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
 
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     name: "",
-    phone: "",
+    company: "",
+    mobile: "",
     email: "",
     service: "",
     address: "",
-    description: "",
-    date: "",
-    time: "",
-    priority: "Normal",
+    requirement: "",
   });
 
+  const openServiceForm = () => {
+    setShowServiceForm(true);
+  };
+
+  const closeServiceForm = () => {
+    if (!sending) {
+      setShowServiceForm(false);
+    }
+  };
+
   const handleChange = (e) => {
-    setForm({
-      ...form,
+    setFormData({
+      ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const sendEmail = async (templateId, templateParams) => {
+    const response = await fetch(
+      "https://api.emailjs.com/api/v1.0/email/send",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          service_id: EMAILJS_SERVICE_ID,
+          template_id: templateId,
+          user_id: EMAILJS_PUBLIC_KEY,
+          template_params: templateParams,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("EmailJS Error:", errorText);
+      throw new Error("EmailJS request failed");
+    }
+
+    return response;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (
+      !formData.name ||
+      !formData.mobile ||
+      !formData.email ||
+      !formData.service ||
+      !formData.address ||
+      !formData.requirement
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
     setSending(true);
-    setError("");
-
-    const requestId =
-      "LEAD-" + Math.floor(100000 + Math.random() * 900000);
-
-    const templateParams = {
-      requestId: requestId,
-      name: form.name,
-      phone: form.phone,
-      email: form.email,
-      service: form.service,
-      address: form.address,
-      description: form.description,
-      date: form.date || "Not specified",
-      time: form.time || "Not specified",
-      priority: form.priority,
-    };
 
     try {
-      await emailjs.send(
-        SERVICE_ID,
-        TEMPLATE_ID,
-        templateParams,
-        PUBLIC_KEY
+      const requestId =
+        "LEAD-" + Date.now().toString().slice(-8);
+
+      const now = new Date();
+
+      const requestDate = now.toLocaleDateString("en-GB");
+
+      const requestTime = now.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      /* SEND REQUEST TO LEAD */
+
+      await sendEmail(INTERNAL_TEMPLATE_ID, {
+        requestId,
+
+        name: formData.name,
+        company: formData.company,
+
+        phone: formData.mobile,
+        mobile: formData.mobile,
+
+        email: formData.email,
+
+        service: formData.service,
+        address: formData.address,
+
+        description: formData.requirement,
+        requirement: formData.requirement,
+
+        date: requestDate,
+        time: requestTime,
+
+        priority: "Normal",
+      });
+
+      /* SEND AUTO REPLY TO CUSTOMER */
+
+      await sendEmail(AUTOREPLY_TEMPLATE_ID, {
+        name: formData.name,
+        company: formData.company,
+
+        mobile: formData.mobile,
+        phone: formData.mobile,
+
+        email: formData.email,
+
+        service: formData.service,
+        address: formData.address,
+
+        requirement: formData.requirement,
+        description: formData.requirement,
+
+        requestId,
+        date: requestDate,
+        time: requestTime,
+      });
+
+      setFormData({
+        name: "",
+        company: "",
+        mobile: "",
+        email: "",
+        service: "",
+        address: "",
+        requirement: "",
+      });
+
+      setShowServiceForm(false);
+      setShowSuccess(true);
+
+    } catch (error) {
+      console.error("SERVICE REQUEST ERROR:", error);
+
+      alert(
+        "Sorry, we could not send your request.\n\nPlease try again."
       );
 
-      setSubmitted(true);
-    } catch (err) {
-      console.error("EmailJS Error:", err);
-      setError(
-        "Sorry, we could not send your request. Please try again."
-      );
     } finally {
       setSending(false);
     }
   };
 
-  const services = [
-    {
-      icon: "⚡",
-      title: "UPS Repair & Service",
-      text: "UPS inspection, troubleshooting, repair and maintenance.",
-    },
-    {
-      icon: "🔋",
-      title: "Battery Replacement",
-      text: "UPS battery testing, replacement and battery service.",
-    },
-    {
-      icon: "🔧",
-      title: "Power Panel Service",
-      text: "Power panel inspection, checking, troubleshooting and repair.",
-    },
-    {
-      icon: "📹",
-      title: "CCTV & Security",
-      text: "CCTV, burglar alarm and door access inspection and repair.",
-    },
-  ];
-
   return (
     <div className="app">
 
       {/* HEADER */}
+
       <header className="header">
+
         <div className="logo">
-          <div className="logo-mark"></div>
-          <span>LEAD</span>
+          <img
+            src="/lead-logo.png"
+            alt="LEAD Technologies"
+          />
         </div>
 
         <nav>
           <a href="#home">Home</a>
           <a href="#services">Services</a>
-          <a href="#about">About</a>
-
-          <button onClick={() => setShowRequest(true)}>
-            Request Service
-          </button>
+          <a href="#about">About Us</a>
+          <a href="#contact">Contact</a>
         </nav>
+
+        <button
+          className="header-btn"
+          onClick={openServiceForm}
+        >
+          Request Service
+        </button>
+
       </header>
 
-      {/* HERO */}
-      <section className="hero" id="home">
-        <div className="hero-content">
 
-          <div className="hero-text">
-            <div className="small-title">LEAD SERVICE</div>
+      <main>
+
+        {/* HERO */}
+
+        <section className="hero" id="home">
+
+          <div className="hero-content">
+
+            <p className="eyebrow">
+              LEAD TECHNOLOGIES (PVT) LTD.
+            </p>
 
             <h1>
-              Reliable <span>Service.</span>
+              Reliable Technology.
               <br />
-              Professional
-              <br />
-              Support.
+              <span>Professional Service.</span>
             </h1>
 
             <p>
-              Fast and professional technical service for UPS systems,
-              batteries, power panels, CCTV and security systems.
+              Complete electrical engineering, power backup,
+              CCTV, networking and technical service solutions
+              for your business.
             </p>
 
-            <button
-              className="main-button"
-              onClick={() => setShowRequest(true)}
-            >
-              Request a Service
-            </button>
-          </div>
+            <div className="buttons">
 
-          <div className="hero-card">
-            <div className="hero-icon">🛠️</div>
-
-            <h2>LEAD Service</h2>
-
-            <p>
-              Tell us what you need. Our technical team will review
-              your request and contact you.
-            </p>
-          </div>
-
-        </div>
-      </section>
-
-      {/* SERVICES */}
-      <section className="services" id="services">
-
-        <div className="section-heading">
-          <div className="blue-label">OUR SERVICES</div>
-
-          <h2>What Can We Service?</h2>
-
-          <p>
-            Professional inspection, repair and replacement services.
-          </p>
-        </div>
-
-        <div className="service-grid">
-
-          {services.map((service, index) => (
-            <div className="service-card" key={index}>
-
-              <div className="service-icon">
-                {service.icon}
-              </div>
-
-              <h3>{service.title}</h3>
-
-              <p>{service.text}</p>
+              <a
+                href="#services"
+                className="primary-btn"
+              >
+                Explore Our Services
+              </a>
 
               <button
-                onClick={() => setShowRequest(true)}
-                className="card-button"
+                className="secondary-btn"
+                onClick={openServiceForm}
               >
-                Request Service
+                Request a Service
               </button>
 
             </div>
-          ))}
 
-        </div>
-      </section>
-
-      {/* ABOUT */}
-      <section className="about" id="about">
-
-        <div className="about-box">
-
-          <div className="blue-label">
-            WHY LEAD SERVICE?
           </div>
 
-          <h2>Technical Support You Can Trust</h2>
 
-          <p>
-            Our service team provides professional inspection,
-            troubleshooting, repair and replacement support for
-            essential power and security systems.
+          <div className="hero-card">
+
+            <div className="icon">
+              ⚡
+            </div>
+
+            <h2>
+              LEAD Technologies
+            </h2>
+
+            <p>
+              Powering Technology,
+              <br />
+              Securing Tomorrow.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        {/* ABOUT */}
+
+        <section
+          className="section"
+          id="about"
+        >
+
+          <p className="eyebrow">
+            ABOUT LEAD
           </p>
 
-          <div className="about-items">
+          <h2>
+            Technology You Can Trust
+          </h2>
 
-            <div>
-              <strong>01</strong>
-              <span>Professional Inspection</span>
-            </div>
+          <p>
+            LEAD Technologies provides professional
+            electrical, power backup, security and
+            network infrastructure solutions for
+            businesses and organizations.
+          </p>
 
-            <div>
-              <strong>02</strong>
-              <span>Reliable Repair Service</span>
-            </div>
+        </section>
 
-            <div>
-              <strong>03</strong>
-              <span>Technical Support</span>
-            </div>
 
-            <div>
-              <strong>04</strong>
-              <span>Customer Focused Service</span>
-            </div>
+        {/* SERVICES */}
 
-          </div>
-        </div>
-      </section>
+        <section
+          className="section services"
+          id="services"
+        >
 
-      {/* REQUEST MODAL */}
-      {showRequest && (
+          <p className="eyebrow">
+            OUR SERVICES
+          </p>
 
-        <div className="modal">
+          <h2>
+            Complete Technical Solutions
+          </h2>
 
-          <div className="modal-box">
+          <div className="cards">
 
-            {!submitted ? (
+            <div>⚡ UPS & Power Backup</div>
 
-              <>
+            <div>🔋 Battery Solutions</div>
 
-                <button
-                  className="close-button"
-                  onClick={() => {
-                    setShowRequest(false);
-                    setError("");
-                  }}
-                >
-                  ×
-                </button>
+            <div>🔧 Electrical Engineering</div>
 
-                <div className="form-title">
+            <div>📹 CCTV & Security</div>
 
-                  <div className="blue-label">
-                    LEAD SERVICE
-                  </div>
+            <div>🌐 Network Infrastructure</div>
 
-                  <h2>Request a Service</h2>
+            <div>🖥️ Server Room Solutions</div>
 
-                  <p>
-                    Tell us about the service you need.
-                  </p>
+            <div>🛠️ Annual Maintenance</div>
 
-                </div>
-
-                <form onSubmit={handleSubmit}>
-
-                  <div className="form-row">
-
-                    <div>
-                      <label>Your Name *</label>
-
-                      <input
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        placeholder="Your name"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label>Phone Number *</label>
-
-                      <input
-                        name="phone"
-                        value={form.phone}
-                        onChange={handleChange}
-                        placeholder="Phone number"
-                        required
-                      />
-                    </div>
-
-                  </div>
-
-                  <div className="form-row">
-
-                    <div>
-                      <label>Email Address</label>
-
-                      <input
-                        type="email"
-                        name="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        placeholder="Email address"
-                      />
-                    </div>
-
-                    <div>
-                      <label>Service Required *</label>
-
-                      <select
-                        name="service"
-                        value={form.service}
-                        onChange={handleChange}
-                        required
-                      >
-                        <option value="">
-                          Select Service
-                        </option>
-
-                        <option>
-                          UPS Repair & Service
-                        </option>
-
-                        <option>
-                          Battery Replacement
-                        </option>
-
-                        <option>
-                          Power Panel Service
-                        </option>
-
-                        <option>
-                          CCTV & Security
-                        </option>
-
-                      </select>
-                    </div>
-
-                  </div>
-
-                  <label>Service Address *</label>
-
-                  <textarea
-                    name="address"
-                    value={form.address}
-                    onChange={handleChange}
-                    placeholder="Where should our technician visit?"
-                    rows="3"
-                    required
-                  />
-
-                  <label>Describe the Problem *</label>
-
-                  <textarea
-                    name="description"
-                    value={form.description}
-                    onChange={handleChange}
-                    placeholder="Please describe the problem..."
-                    rows="4"
-                    required
-                  />
-
-                  <div className="form-row">
-
-                    <div>
-                      <label>Preferred Date</label>
-
-                      <input
-                        type="date"
-                        name="date"
-                        value={form.date}
-                        onChange={handleChange}
-                      />
-                    </div>
-
-                    <div>
-                      <label>Preferred Time</label>
-
-                      <input
-                        type="time"
-                        name="time"
-                        value={form.time}
-                        onChange={handleChange}
-                      />
-                    </div>
-
-                  </div>
-
-                  <label>Priority</label>
-
-                  <select
-                    name="priority"
-                    value={form.priority}
-                    onChange={handleChange}
-                  >
-                    <option>Normal</option>
-                    <option>Urgent</option>
-                    <option>Emergency</option>
-                  </select>
-
-                  {error && (
-                    <div
-                      style={{
-                        marginTop: "15px",
-                        padding: "12px",
-                        borderRadius: "8px",
-                        background: "#fff0f0",
-                        color: "#c62828",
-                        fontSize: "14px",
-                      }}
-                    >
-                      {error}
-                    </div>
-                  )}
-
-                  <button
-                    className="submit-button"
-                    type="submit"
-                    disabled={sending}
-                  >
-                    {sending
-                      ? "Sending Request..."
-                      : "Submit Service Request"}
-                  </button>
-
-                </form>
-
-              </>
-
-            ) : (
-
-              <div className="success-box">
-
-                <div className="success-icon">
-                  ✓
-                </div>
-
-                <div className="blue-label">
-                  REQUEST SUBMITTED
-                </div>
-
-                <h2>Thank You!</h2>
-
-                <p>
-                  Your service request has been successfully
-                  submitted.
-                  <br />
-                  Our team will review it and contact you shortly.
-                </p>
-
-                <button
-                  className="submit-button"
-                  onClick={() => {
-                    setShowRequest(false);
-                    setSubmitted(false);
-
-                    setForm({
-                      name: "",
-                      phone: "",
-                      email: "",
-                      service: "",
-                      address: "",
-                      description: "",
-                      date: "",
-                      time: "",
-                      priority: "Normal",
-                    });
-                  }}
-                >
-                  Back to Home
-                </button>
-
-              </div>
-
-            )}
+            <div>🏢 Project Implementation</div>
 
           </div>
-        </div>
-      )}
+
+        </section>
+
+
+        {/* CONTACT */}
+
+        <section
+          className="contact"
+          id="contact"
+        >
+
+          <p className="eyebrow">
+            GET IN TOUCH
+          </p>
+
+          <h2>
+            Need Technical Support?
+          </h2>
+
+          <p>
+            Contact LEAD Technologies for professional
+            technical support.
+          </p>
+
+          <h3>
+            +94 07 07 189 186
+          </h3>
+
+          <h3>
+            nalin@lead.lk
+          </h3>
+
+          <button
+            className="primary-btn contact-btn"
+            onClick={openServiceForm}
+          >
+            Request a Service
+          </button>
+
+        </section>
+
+      </main>
+
 
       {/* FOOTER */}
+
       <footer>
+        © 2026 LEAD Technologies. All Rights Reserved.
+      </footer>
 
-        <div className="footer-logo">
 
-          <div className="logo-mark"></div>
+      {/* SERVICE REQUEST POPUP */}
 
-          <span>LEAD</span>
+      {showServiceForm && (
+
+        <div
+          className="service-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeServiceForm();
+            }
+          }}
+        >
+
+          <div className="service-modal">
+
+            <button
+              className="close-btn"
+              onClick={closeServiceForm}
+              disabled={sending}
+            >
+              ×
+            </button>
+
+            <p className="modal-eyebrow">
+              LEAD TECHNOLOGIES
+            </p>
+
+            <h2>
+              Request a Service
+            </h2>
+
+            <p className="modal-text">
+              Please provide your details and service requirement.
+            </p>
+
+            <form onSubmit={handleSubmit}>
+
+              <input
+                type="text"
+                name="name"
+                placeholder="Your Name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+
+              <input
+                type="text"
+                name="company"
+                placeholder="Company Name"
+                value={formData.company}
+                onChange={handleChange}
+              />
+
+              <input
+                type="tel"
+                name="mobile"
+                placeholder="Mobile Number"
+                value={formData.mobile}
+                onChange={handleChange}
+                required
+              />
+
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+
+              <select
+                name="service"
+                value={formData.service}
+                onChange={handleChange}
+                required
+              >
+
+                <option value="">
+                  Select Service
+                </option>
+
+                <option value="UPS & Power Backup">
+                  UPS & Power Backup
+                </option>
+
+                <option value="Battery Solutions">
+                  Battery Solutions
+                </option>
+
+                <option value="Electrical Engineering">
+                  Electrical Engineering
+                </option>
+
+                <option value="CCTV & Security">
+                  CCTV & Security
+                </option>
+
+                <option value="Network Infrastructure">
+                  Network Infrastructure
+                </option>
+
+                <option value="Server Room Solutions">
+                  Server Room Solutions
+                </option>
+
+                <option value="Annual Maintenance">
+                  Annual Maintenance
+                </option>
+
+                <option value="Project Implementation">
+                  Project Implementation
+                </option>
+
+              </select>
+
+              <input
+                type="text"
+                name="address"
+                placeholder="Service Location / Address"
+                value={formData.address}
+                onChange={handleChange}
+                required
+              />
+
+              <textarea
+                name="requirement"
+                rows="5"
+                placeholder="Tell us about your requirement"
+                value={formData.requirement}
+                onChange={handleChange}
+                required
+              />
+
+              <button
+                type="submit"
+                className="send-btn"
+                disabled={sending}
+              >
+                {sending
+                  ? "Sending..."
+                  : "Send Service Request"}
+              </button>
+
+            </form>
+
+          </div>
 
         </div>
 
-        <p>
-          Professional technical service for power and security systems.
-        </p>
+      )}
 
-        <div className="footer-line"></div>
 
-        <small>
-          © 2026 LEAD Technologies. All Rights Reserved.
-        </small>
+      {/* SUCCESS POPUP */}
 
-      </footer>
+      {showSuccess && (
+
+        <div className="success-overlay">
+
+          <div className="success-box">
+
+            <div className="success-icon">
+              ✓
+            </div>
+
+            <p className="success-small">
+              LEAD TECHNOLOGIES
+            </p>
+
+            <h2>
+              Request Sent Successfully!
+            </h2>
+
+            <p className="success-text">
+              Thank you for contacting LEAD Technologies.
+              <br />
+              Our team will contact you shortly.
+            </p>
+
+            <button
+              className="success-btn"
+              onClick={() => setShowSuccess(false)}
+            >
+              Done
+            </button>
+
+          </div>
+
+        </div>
+
+      )}
 
     </div>
   );
