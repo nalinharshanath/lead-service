@@ -13,7 +13,7 @@ function App() {
       text: "Battery testing, replacement, maintenance and backup solutions.",
     },
     {
-      icon: "🔧",
+      icon: "⚙️",
       title: "Electrical Engineering",
       text: "Professional electrical inspection, troubleshooting and engineering services.",
     },
@@ -44,21 +44,15 @@ function App() {
     },
   ];
 
-  const scrollToServices = () => {
-    document.getElementById("services")?.scrollIntoView({
-      behavior: "smooth",
-    });
-  };
-
-  const scrollToContact = () => {
-    document.getElementById("contact")?.scrollIntoView({
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({
       behavior: "smooth",
     });
   };
 
   return (
     <div className="app">
-      {/* NAVIGATION */}
+      {/* NAVBAR */}
       <header className="navbar">
         <div className="nav-inner">
           <a href="#home" className="logo">
@@ -72,7 +66,10 @@ function App() {
             <a href="#contact">Contact</a>
           </nav>
 
-          <button className="nav-button" onClick={scrollToContact}>
+          <button
+            className="nav-button"
+            onClick={() => scrollTo("contact")}
+          >
             Request Service
           </button>
         </div>
@@ -80,104 +77,174 @@ function App() {
 
       {/* HERO */}
       <section id="home" className="hero">
-        <div className="hero-content">
-          <div className="hero-left">
-            <p className="eyebrow">LEAD TECHNOLOGIES (PVT) LTD.</p>
+        <div className="hero-shape shape-one"></div>
+        <div className="hero-shape shape-two"></div>
+
+        <div className="hero-inner">
+          <div className="hero-text">
+            <div className="hero-label">
+              LEAD TECHNOLOGIES (PVT) LTD.
+            </div>
 
             <h1>
               Reliable
               <br />
-              Technology.
+              <span>Technology.</span>
               <br />
-              <span>Professional</span>
+              Professional
               <br />
-              <span>Service.</span>
+              <strong>Service.</strong>
             </h1>
 
-            <p className="hero-description">
+            <p>
               Complete electrical engineering, power backup, CCTV,
               networking and technical service solutions for your business.
             </p>
 
             <div className="hero-buttons">
-              <button className="primary-button" onClick={scrollToServices}>
-                Explore Our Services
+              <button
+                className="btn yellow"
+                onClick={() => scrollTo("services")}
+              >
+                Explore Our Services →
               </button>
 
-              <button className="secondary-button" onClick={scrollToContact}>
+              <button
+                className="btn outline"
+                onClick={() => scrollTo("contact")}
+              >
                 Request a Service
               </button>
             </div>
+
+            <div className="hero-stats">
+              <div>
+                <b>17+</b>
+                <span>Years Experience</span>
+              </div>
+
+              <div>
+                <b>500+</b>
+                <span>Projects</span>
+              </div>
+
+              <div>
+                <b>24/7</b>
+                <span>Technical Support</span>
+              </div>
+            </div>
           </div>
 
-          <div className="hero-card">
-            <div className="hero-icon">⚡</div>
-            <h2>LEAD Technologies</h2>
-            <p>Powering Technology.</p>
-            <p>Securing Tomorrow.</p>
+          <div className="hero-card-wrap">
+            <div className="hero-card">
+              <div className="electric-icon">⚡</div>
+
+              <h2>LEAD</h2>
+              <h3>Technologies</h3>
+
+              <div className="card-line"></div>
+
+              <p>Powering Technology.</p>
+              <p>Securing Tomorrow.</p>
+
+              <div className="card-badge">
+                Professional Technical Solutions
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ABOUT */}
-      <section id="about" className="about section">
-        <div className="section-inner">
-          <p className="section-label">ABOUT LEAD</p>
+      <section id="about" className="about">
+        <div className="container">
+          <div className="section-heading">
+            <span>ABOUT LEAD</span>
+            <h2>Technology You Can Trust</h2>
+            <p>
+              LEAD Technologies provides professional electrical,
+              power backup, security and network infrastructure
+              solutions for businesses and organizations.
+            </p>
+          </div>
 
-          <h2>Technology You Can Trust</h2>
+          <div className="about-grid">
+            <div className="about-content">
+              <h3>Complete Technology Solutions Under One Roof</h3>
 
-          <p className="about-text">
-            LEAD Technologies provides professional electrical, power backup,
-            security and network infrastructure solutions for businesses and
-            organizations.
-          </p>
+              <p>
+                From power backup and electrical engineering to
+                CCTV, networking and technical maintenance, our
+                team provides reliable solutions designed around
+                your business requirements.
+              </p>
 
-          <div className="about-points">
-            <div>
-              <strong>01</strong>
-              <span>Professional Team</span>
+              <button
+                className="dark-button"
+                onClick={() => scrollTo("services")}
+              >
+                Discover Our Services →
+              </button>
             </div>
 
-            <div>
-              <strong>02</strong>
-              <span>Quality Solutions</span>
-            </div>
+            <div className="about-points">
+              <div className="point-card">
+                <b>01</b>
+                <h4>Professional Team</h4>
+                <p>Experienced technical professionals.</p>
+              </div>
 
-            <div>
-              <strong>03</strong>
-              <span>Fast Response</span>
-            </div>
+              <div className="point-card">
+                <b>02</b>
+                <h4>Quality Solutions</h4>
+                <p>Reliable products and solutions.</p>
+              </div>
 
-            <div>
-              <strong>04</strong>
-              <span>After-Sales Support</span>
+              <div className="point-card">
+                <b>03</b>
+                <h4>Fast Response</h4>
+                <p>Quick technical assistance.</p>
+              </div>
+
+              <div className="point-card">
+                <b>04</b>
+                <h4>After-Sales Support</h4>
+                <p>Continuous customer support.</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* SERVICES */}
-      <section id="services" className="services section">
-        <div className="section-inner">
-          <p className="section-label">OUR SERVICES</p>
-
-          <h2>Complete Technical Solutions</h2>
-
-          <p className="section-description">
-            Professional solutions designed for reliable business operations.
-          </p>
+      <section id="services" className="services">
+        <div className="container">
+          <div className="section-heading center">
+            <span>OUR SERVICES</span>
+            <h2>Complete Technical Solutions</h2>
+            <p>
+              Professional solutions designed for reliable
+              business operations.
+            </p>
+          </div>
 
           <div className="services-grid">
             {services.map((service, index) => (
               <div className="service-card" key={index}>
-                <div className="service-icon">{service.icon}</div>
+                <div className="service-number">
+                  {String(index + 1).padStart(2, "0")}
+                </div>
+
+                <div className="service-icon">
+                  {service.icon}
+                </div>
 
                 <h3>{service.title}</h3>
 
                 <p>{service.text}</p>
 
-                <button onClick={scrollToContact}>
-                  Request Service
+                <button onClick={() => scrollTo("contact")}>
+                  Request Service →
                 </button>
               </div>
             ))}
@@ -185,44 +252,122 @@ function App() {
         </div>
       </section>
 
+      {/* WHY LEAD */}
+      <section className="why-lead">
+        <div className="container">
+          <div className="section-heading center white">
+            <span>WHY CHOOSE LEAD?</span>
+            <h2>Built Around Your Business</h2>
+            <p>
+              Reliable technology, professional service and
+              dependable technical support.
+            </p>
+          </div>
+
+          <div className="why-grid">
+            <div>
+              <strong>01</strong>
+              <h3>Experience</h3>
+              <p>Years of technical industry experience.</p>
+            </div>
+
+            <div>
+              <strong>02</strong>
+              <h3>Quality</h3>
+              <p>Professional solutions and trusted products.</p>
+            </div>
+
+            <div>
+              <strong>03</strong>
+              <h3>Response</h3>
+              <p>Fast and efficient technical assistance.</p>
+            </div>
+
+            <div>
+              <strong>04</strong>
+              <h3>Support</h3>
+              <p>Reliable after-sales technical support.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* INDUSTRIES */}
       <section className="industries">
-        <div className="section-inner">
-          <p className="section-label light-label">OUR EXPERIENCE</p>
-
-          <h2>Solutions Across Multiple Industries</h2>
+        <div className="container">
+          <div className="section-heading center">
+            <span>OUR EXPERIENCE</span>
+            <h2>Solutions Across Multiple Industries</h2>
+          </div>
 
           <div className="industry-grid">
-            <div>🏢 Commercial Buildings</div>
-            <div>🏭 Factories & Industries</div>
-            <div>🏨 Hotels & Hospitality</div>
-            <div>🏛️ Government & Organizations</div>
+            <div className="industry-card">
+              <span>🏢</span>
+              <h3>Commercial Buildings</h3>
+            </div>
+
+            <div className="industry-card">
+              <span>🏭</span>
+              <h3>Factories & Industries</h3>
+            </div>
+
+            <div className="industry-card">
+              <span>🏨</span>
+              <h3>Hotels & Hospitality</h3>
+            </div>
+
+            <div className="industry-card">
+              <span>🏛️</span>
+              <h3>Government & Organizations</h3>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CONTACT */}
-      <section id="contact" className="contact section">
-        <div className="contact-inner">
-          <div>
-            <p className="section-label">GET IN TOUCH</p>
+      <section id="contact" className="contact">
+        <div className="container contact-inner">
+          <div className="contact-text">
+            <span>GET IN TOUCH</span>
 
             <h2>Need Technical Support?</h2>
 
             <p>
-              Contact LEAD Technologies for professional technical solutions
-              and service support.
+              Contact LEAD Technologies for professional technical
+              solutions and service support.
             </p>
+
+            <div className="contact-buttons">
+              <a href="tel:+94707189186" className="contact-btn">
+                📞 Call Us
+              </a>
+
+              <a
+                href="mailto:nalin@lead.lk"
+                className="contact-btn"
+              >
+                ✉️ Email Us
+              </a>
+            </div>
           </div>
 
           <div className="contact-card">
+            <div className="contact-icon">⚡</div>
+
             <h3>LEAD Technologies</h3>
 
-            <a href="tel:+94707189186">+94 07 07 189 186</a>
+            <a href="tel:+94707189186">
+              +94 07 07 189 186
+            </a>
 
-            <a href="mailto:nalin@lead.lk">nalin@lead.lk</a>
+            <a href="mailto:nalin@lead.lk">
+              nalin@lead.lk
+            </a>
 
-            <button className="primary-button" onClick={scrollToContact}>
+            <button
+              className="btn yellow full"
+              onClick={() => scrollTo("contact")}
+            >
               Request a Service
             </button>
           </div>
@@ -231,12 +376,26 @@ function App() {
 
       {/* FOOTER */}
       <footer>
-        <div>
-          <strong>LEAD TECHNOLOGIES (PVT) LTD.</strong>
-          <span>Professional Technology & Technical Services</span>
-        </div>
+        <div className="footer-inner">
+          <div>
+            <img src="/lead-logo.png" alt="LEAD Technologies" />
 
-        <p>© 2026 LEAD Technologies. All Rights Reserved.</p>
+            <p>
+              Professional Technology & Technical Services
+            </p>
+          </div>
+
+          <div className="footer-links">
+            <a href="#home">Home</a>
+            <a href="#services">Services</a>
+            <a href="#about">About Us</a>
+            <a href="#contact">Contact</a>
+          </div>
+
+          <p className="copyright">
+            © 2026 LEAD Technologies. All Rights Reserved.
+          </p>
+        </div>
       </footer>
     </div>
   );
